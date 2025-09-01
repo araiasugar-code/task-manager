@@ -102,8 +102,8 @@ export function useUnifiedAuth() {
         }
 
         return { data, error: null }
-      } catch (error) {
-        return { data: null, error }
+      } catch (error: any) {
+        return { data: null, error: error.message || '登録に失敗しました' }
       }
     }
   }
@@ -127,8 +127,8 @@ export function useUnifiedAuth() {
 
         if (error) throw error
         return { data, error: null }
-      } catch (error) {
-        return { data: null, error }
+      } catch (error: any) {
+        return { data: null, error: error.message || 'ログインに失敗しました' }
       }
     }
   }
@@ -144,8 +144,8 @@ export function useUnifiedAuth() {
         const { error } = await supabase.auth.signOut()
         if (error) throw error
         return { error: null }
-      } catch (error) {
-        return { error }
+      } catch (error: any) {
+        return { error: error.message || 'ログアウトに失敗しました' }
       }
     }
   }
@@ -162,8 +162,8 @@ export function useUnifiedAuth() {
         
         if (error) throw error
         return { data, error: null }
-      } catch (error) {
-        return { data: null, error }
+      } catch (error: any) {
+        return { data: null, error: error.message || 'パスワードリセットに失敗しました' }
       }
     }
   }
