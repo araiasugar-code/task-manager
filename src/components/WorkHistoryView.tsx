@@ -65,13 +65,7 @@ export default function WorkHistoryView() {
         const storedTasks = localStorage.getItem('mock_tasks')
         const allTasks: Task[] = storedTasks ? JSON.parse(storedTasks) : []
         
-        console.log('=== WorkHistory FULL DEBUG ===')
-        console.log('Total tasks in localStorage:', allTasks.length)
-        console.log('All tasks:', allTasks)
-        console.log('Current user:', user)
-        console.log('Selected month:', selectedMonth)
-        console.log('Dates to check:', dates)
-        console.log('================================')
+        // モックモードはもう使用されません
         
         dates.forEach(date => {
           const dayTasks = allTasks.filter(task => {
@@ -82,14 +76,7 @@ export default function WorkHistoryView() {
             const matchByName = task.staff_name === userName
             const matchById = task.created_by === user?.id
             
-            if (date === new Date().toISOString().split('T')[0] && allTasks.length > 0) {
-              console.log('=== WorkHistory Debug ===')
-              console.log('Date:', date)
-              console.log('User:', { userName, id: user?.id })
-              console.log('Task:', { staff_name: task.staff_name, created_by: task.created_by, task_name: task.task_name })
-              console.log('Match by name:', matchByName, 'Match by ID:', matchById)
-              console.log('========================')
-            }
+            // デバッグログは削除済み
             
             return matchByName || matchById
           })

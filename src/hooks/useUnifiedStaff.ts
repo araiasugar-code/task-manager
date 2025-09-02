@@ -6,18 +6,8 @@ import { StaffMember } from '@/lib/types'
 import { mockStaff } from '@/lib/mockData'
 import { useUnifiedAuth } from './useUnifiedAuth'
 
-// モックモード判定（環境変数またはローカルストレージの強制設定）
-const forceMockMode = typeof window !== 'undefined' ? localStorage.getItem('force_mock_mode') === 'true' : false
 // モックモードを完全に無効化 - 全てSupabaseを使用
 const isMockMode = false
-
-console.log('=== useUnifiedStaff MODE CHECK ===')
-console.log('MOCK_MODE環境変数:', process.env.NEXT_PUBLIC_MOCK_MODE)
-console.log('forceMockMode:', forceMockMode)
-console.log('isVercelDeployment:', isVercelDeployment)
-console.log('hostname:', typeof window !== 'undefined' ? window.location.hostname : 'server-side')
-console.log('最終isMockMode:', isMockMode)
-console.log('========================')
 
 export function useUnifiedStaff() {
   const [staff, setStaff] = useState<StaffMember[]>([])
