@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
     // TypeScriptエラーを無視（デプロイのため）
     ignoreBuildErrors: true,
   },
+  experimental: {
+    // Supabaseとの通信を許可
+    serverExternalPackages: ['@supabase/supabase-js'],
+  },
 };
 
 export default nextConfig;
