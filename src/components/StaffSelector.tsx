@@ -122,8 +122,24 @@ export default function StaffSelector() {
             )}
           </div>
 
-          {/* スタッフ追加フォーム */}
+          {/* デバッグ用クリアボタン */}
           <div className="mt-4 pt-4 border-t border-gray-300">
+            <button
+              onClick={() => {
+                if (confirm('全てのスタッフデータとタスクデータをクリアしますか？')) {
+                  localStorage.removeItem('mock_staff')
+                  localStorage.removeItem('mock_tasks')
+                  window.location.reload()
+                }
+              }}
+              className="w-full py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded mb-2"
+            >
+              🗑️ デバッグ: 全データクリア
+            </button>
+          </div>
+
+          {/* スタッフ追加フォーム */}
+          <div className="mt-2 pt-2 border-t border-gray-300">
             {isAddingStaff ? (
               <form onSubmit={handleAddStaff} className="flex gap-2">
                 <input

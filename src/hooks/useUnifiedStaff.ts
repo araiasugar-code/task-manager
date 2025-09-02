@@ -35,9 +35,9 @@ export function useUnifiedStaff() {
       const storedStaff = localStorage.getItem('mock_staff')
       if (storedStaff) {
         const parsedStaff = JSON.parse(storedStaff)
-        // 日本語名のデモユーザーをフィルタリングして除去
+        // デモユーザーをフィルタリングして除去
         const filteredStaff = parsedStaff.filter((s: StaffMember) => 
-          !['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー'].includes(s.name)
+          !['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo'].includes(s.name)
         )
         setStaff(filteredStaff)
         localStorage.setItem('mock_staff', JSON.stringify(filteredStaff))
@@ -155,14 +155,23 @@ export function useUnifiedStaff() {
   }
 
   const deleteStaff = async (id: string) => {
+    console.log('deleteStaff called with id:', id, 'isMockMode:', isMockMode)
+    
     if (isMockMode) {
+      console.log('Current staff before deletion:', staff)
+      const staffToDelete = staff.find(s => s.id === id)
+      console.log('Staff to delete:', staffToDelete)
+      
       const updatedStaff = staff.filter(s => s.id !== id)
+      console.log('Updated staff after deletion:', updatedStaff)
+      
       setStaff(updatedStaff)
       localStorage.setItem('mock_staff', JSON.stringify(updatedStaff))
       
       return { error: null }
     } else {
       try {
+        console.log('Deleting staff from Supabase with id:', id)
         const { error } = await supabase
           .from('staff_members')
           .update({ is_active: false })
@@ -172,6 +181,7 @@ export function useUnifiedStaff() {
         setStaff(prev => prev.filter(s => s.id !== id))
         return { error: null }
       } catch (err: any) {
+        console.error('Supabase delete error:', err)
         return { error: err.message }
       }
     }

@@ -42,9 +42,9 @@ export function useUnifiedTasks(date: string) {
       
       if (storedTasks) {
         const parsedTasks = JSON.parse(storedTasks)
-        // 日本語名のデモユーザーのタスクをフィルタリングして除去
+        // デモユーザーのタスクをフィルタリングして除去
         allTasks = parsedTasks.filter((task: Task) => 
-          !['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', 'demo'].includes(task.staff_name)
+          !['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo'].includes(task.staff_name)
         )
         localStorage.setItem('mock_tasks', JSON.stringify(allTasks))
       } else {
