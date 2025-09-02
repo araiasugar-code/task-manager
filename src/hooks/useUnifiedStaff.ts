@@ -10,9 +10,11 @@ import { useUnifiedAuth } from './useUnifiedAuth'
 const forceMockMode = typeof window !== 'undefined' ? localStorage.getItem('force_mock_mode') === 'true' : false
 const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true' || forceMockMode
 
-console.log('useUnifiedStaff - MOCK_MODE環境変数:', process.env.NEXT_PUBLIC_MOCK_MODE)
-console.log('useUnifiedStaff - forceMockMode:', forceMockMode)
-console.log('useUnifiedStaff - 最終isMockMode:', isMockMode)
+console.log('=== useUnifiedStaff MODE CHECK ===')
+console.log('MOCK_MODE環境変数:', process.env.NEXT_PUBLIC_MOCK_MODE)
+console.log('forceMockMode:', forceMockMode)
+console.log('最終isMockMode:', isMockMode)
+console.log('========================')
 
 export function useUnifiedStaff() {
   const [staff, setStaff] = useState<StaffMember[]>([])
@@ -100,18 +102,21 @@ export function useUnifiedStaff() {
 
       if (error) throw error
       
-      // 重複を除去（名前とメールアドレスで）
+      // 重複を除去（名前とメールアドレスで）+ phantom staffを除外
+      const phantomNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', 'demo', 'aaaaaaa', 'test', 'sample', 'テスト', '山本']
       const uniqueStaff = data?.reduce((acc: any[], current) => {
         const isDuplicate = acc.some(item => 
           item.name === current.name || 
           (item.email && current.email && item.email === current.email)
         )
-        if (!isDuplicate) {
+        const isPhantom = phantomNames.includes(current.name)
+        if (!isDuplicate && !isPhantom) {
           acc.push(current)
         }
         return acc
       }, []) || []
       
+      console.log('Supabase staff filtered (removed phantoms):', uniqueStaff)
       setStaff(uniqueStaff)
     } catch (err: any) {
       setError(err.message)
