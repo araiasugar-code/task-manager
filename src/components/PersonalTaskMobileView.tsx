@@ -171,8 +171,16 @@ export default function PersonalTaskMobileView() {
 
       {/* フッター */}
       <div className="p-4 border-t border-gray-200">
-        <div className="text-center text-sm text-gray-500">
-          <p>タスクをタップして編集できます</p>
+        <div className="text-center space-y-2">
+          <p className="text-sm text-gray-500">タスクをタップして編集できます</p>
+          <div className="text-xs text-gray-400 space-y-1">
+            <p>© 2025 日次タスク管理システム</p>
+            <p>Developed by <span className="font-semibold">akihiro_arai</span></p>
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+              <span>本番稼働中 Ver 1.0</span>
+            </div>
+          </div>
         </div>
       </div>
 

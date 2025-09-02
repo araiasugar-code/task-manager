@@ -262,6 +262,28 @@ export default function DashboardPage() {
           </div>
           )
         )}
+        
+        {/* フッター - 会社情報 */}
+        <footer className="mt-12 py-8 border-t border-slate-200">
+          <div className="text-center space-y-2">
+            <p className="text-sm text-slate-600">
+              © 2025 日次タスク管理システム - Developed by <span className="font-semibold text-slate-800">akihiro_arai</span>
+            </p>
+            <p className="text-xs text-slate-500">
+              Next.js 14 + TypeScript + Supabase による企業向けタスク管理ソリューション
+            </p>
+            <div className="flex items-center justify-center gap-4 text-xs text-slate-500 mt-3">
+              <span className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                本番稼働中
+              </span>
+              <span>|</span>
+              <span>Ver 1.0</span>
+              <span>|</span>
+              <span>Powered by Claude Code</span>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   )
