@@ -47,22 +47,26 @@ export function useUnifiedStaff() {
       // 実際のSupabase
       try {
         // まず現在のユーザーがスタッフテーブルに存在するかチェック
-        const { data: existingStaff } = await supabase
+        const { data: existingStaff, error: checkError } = await supabase
           .from('staff_members')
           .select('*')
           .or(`name.eq.${userName},email.eq.${user.email}`)
           .eq('is_active', true)
-          .single()
+          .maybeSingle()
 
-        if (!existingStaff) {
+        if (!existingStaff && !checkError) {
           // 存在しない場合は自動追加
-          await supabase
+          const { error: insertError } = await supabase
             .from('staff_members')
             .insert({
               name: userName,
               email: user.email,
               user_id: user.id
             })
+          
+          if (insertError) {
+            console.error('Error adding user to staff:', insertError)
+          }
         }
         
         await fetchStaff()
