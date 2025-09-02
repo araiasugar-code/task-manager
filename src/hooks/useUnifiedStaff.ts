@@ -43,10 +43,23 @@ export function useUnifiedStaff() {
         .from('staff_members')
         .select('*')
         .eq('is_active', true)
-        .order('name')
+        .order('created_at', { ascending: true })
 
       if (error) throw error
-      setStaff(data || [])
+      
+      // 重複を除去（名前とメールアドレスで）
+      const uniqueStaff = data?.reduce((acc: any[], current) => {
+        const isDuplicate = acc.some(item => 
+          item.name === current.name || 
+          (item.email && current.email && item.email === current.email)
+        )
+        if (!isDuplicate) {
+          acc.push(current)
+        }
+        return acc
+      }, []) || []
+      
+      setStaff(uniqueStaff)
     } catch (err: any) {
       setError(err.message)
     } finally {
