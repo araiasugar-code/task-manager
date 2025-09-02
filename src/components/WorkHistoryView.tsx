@@ -70,7 +70,19 @@ export default function WorkHistoryView() {
             
             // 現在のユーザーのタスクのみ
             const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || user?.email
-            return task.staff_name === userName || task.created_by === user?.id
+            const matchByName = task.staff_name === userName
+            const matchById = task.created_by === user?.id
+            
+            if (date === new Date().toISOString().split('T')[0] && allTasks.length > 0) {
+              console.log('=== WorkHistory Debug ===')
+              console.log('Date:', date)
+              console.log('User:', { userName, id: user?.id })
+              console.log('Task:', { staff_name: task.staff_name, created_by: task.created_by, task_name: task.task_name })
+              console.log('Match by name:', matchByName, 'Match by ID:', matchById)
+              console.log('========================')
+            }
+            
+            return matchByName || matchById
           })
           
           if (dayTasks.length > 0) {
