@@ -51,12 +51,11 @@ export default function StaffSelector() {
         console.log('削除結果:', result)
         
         if (result?.error) {
-          alert(`削除に失敗しました: ${result.error}\n\nMOCK_MODE: ${process.env.NEXT_PUBLIC_MOCK_MODE}`)
+          alert(`削除に失敗しました: ${result.error}`)
           console.error('削除エラー:', result.error)
         } else {
           console.log(`スタッフ削除成功: ${name}`)
-          // 強制的にページリロード
-          setTimeout(() => window.location.reload(), 500)
+          // ページリロードなしで即座に反映されるはず
         }
       } catch (err: any) {
         console.error('削除例外:', err)
@@ -160,30 +159,20 @@ export default function StaffSelector() {
             )}
           </div>
 
-          {/* デバッグ用クリアボタン */}
-          <div className="mt-4 pt-4 border-t border-gray-300">
-            <div className="space-y-2">
+          {/* 管理者用ボタン（開発時のみ表示） */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 pt-4 border-t border-gray-300">
               <button
                 onClick={() => {
-                  console.log('LocalStorage before clear:', {
-                    staff: localStorage.getItem('mock_staff'),
-                    tasks: localStorage.getItem('mock_tasks')
-                  })
+                  const action = confirm('データクリア操作を選択してください:\n\nOK = 全データクリア\nキャンセル = 存在しないスタッフのみクリア')
                   
-                  if (confirm('全てのスタッフデータとタスクデータをクリアしますか？\n\n「山本」「aaaaaaa」などの存在しないユーザーも完全に削除されます。')) {
-                    localStorage.clear() // 全てのlocalStorageをクリア
-                    console.log('LocalStorage cleared, reloading...')
+                  if (action) {
+                    // 全データクリア
+                    localStorage.clear()
+                    console.log('All data cleared')
                     window.location.reload()
-                  }
-                }}
-                className="w-full py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded"
-              >
-                🗑️ 緊急: 全データクリア & リロード
-              </button>
-              
-              <button
-                onClick={() => {
-                  if (confirm('存在しないスタッフ（山本、aaaaaaaなど）を削除しますか？')) {
+                  } else {
+                    // 存在しないスタッフのみクリア
                     const currentStaff = JSON.parse(localStorage.getItem('mock_staff') || '[]')
                     const excludedNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo', 'aaaaaaa', 'test', 'sample', 'テスト']
                     const cleanedStaff = currentStaff.filter((s: any) => !excludedNames.includes(s.name))
@@ -193,47 +182,16 @@ export default function StaffSelector() {
                     const cleanedTasks = currentTasks.filter((t: any) => !excludedNames.includes(t.staff_name))
                     localStorage.setItem('mock_tasks', JSON.stringify(cleanedTasks))
                     
-                    console.log(`クリーンアップ完了: ${currentStaff.length - cleanedStaff.length}名のスタッフと${currentTasks.length - cleanedTasks.length}件のタスクを削除`)
+                    console.log(`クリーンアップ完了: ${currentStaff.length - cleanedStaff.length}名のスタッフを削除`)
                     window.location.reload()
                   }
                 }}
-                className="w-full py-1 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded"
+                className="w-full py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded"
               >
-                🧹 存在しないスタッフをクリーンアップ
-              </button>
-              
-              <button
-                onClick={() => {
-                  console.log('Current localStorage:', {
-                    staff: localStorage.getItem('mock_staff'),
-                    tasks: localStorage.getItem('mock_tasks'),
-                    deleted_staff: localStorage.getItem('deleted_staff')
-                  })
-                  console.log('Current staff state:', staff)
-                  console.log('Environment variables:', {
-                    MOCK_MODE: process.env.NEXT_PUBLIC_MOCK_MODE,
-                    SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL
-                  })
-                  alert(`LocalStorage確認:\n\nStaff: ${staff.length}名\nDeleted: ${JSON.parse(localStorage.getItem('deleted_staff') || '[]').length}名\nMOCK_MODE: ${process.env.NEXT_PUBLIC_MOCK_MODE}\n\nコンソールで詳細確認可能`)
-                }}
-                className="w-full py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded"
-              >
-                🔍 デバッグ情報表示
-              </button>
-              
-              <button
-                onClick={() => {
-                  if (confirm('モックモードに強制切り替えしますか？')) {
-                    localStorage.setItem('force_mock_mode', 'true')
-                    window.location.reload()
-                  }
-                }}
-                className="w-full py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-xs rounded"
-              >
-                ⚡ 強制モックモード
+                🔧 管理者メニュー
               </button>
             </div>
-          </div>
+          )}
 
           {/* スタッフ追加フォーム */}
           <div className="mt-2 pt-2 border-t border-gray-300">

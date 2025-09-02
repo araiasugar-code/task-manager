@@ -178,15 +178,10 @@ export function useUnifiedStaff() {
     console.log('=== deleteStaff START ===')
     console.log('ID to delete:', id)
     console.log('isMockMode:', isMockMode)
-    console.log('Current staff state:', staff)
     
     try {
       if (isMockMode) {
         console.log('MOCK MODE: Processing deletion')
-        
-        // 現在のLocalStorageの状態を確認
-        const currentLocalStorage = localStorage.getItem('mock_staff')
-        console.log('Current localStorage mock_staff:', currentLocalStorage)
         
         const staffToDelete = staff.find(s => s.id === id)
         console.log('Staff to delete:', staffToDelete)
@@ -196,23 +191,20 @@ export function useUnifiedStaff() {
           return { error: 'スタッフが見つかりません' }
         }
         
-        // 削除済みリストをLocalStorageに記録（再生成防止）
+        // 削除済みリストに追加（重複防止）
         const deletedStaff = JSON.parse(localStorage.getItem('deleted_staff') || '[]')
-        deletedStaff.push(staffToDelete.name)
-        localStorage.setItem('deleted_staff', JSON.stringify(deletedStaff))
-        console.log('Added to deleted list:', staffToDelete.name)
+        if (!deletedStaff.includes(staffToDelete.name)) {
+          deletedStaff.push(staffToDelete.name)
+          localStorage.setItem('deleted_staff', JSON.stringify(deletedStaff))
+          console.log('Added to deleted list:', staffToDelete.name)
+        }
         
+        // LocalStorageとstateの両方を即座に更新
         const updatedStaff = staff.filter(s => s.id !== id)
-        console.log('Updated staff after filter:', updatedStaff)
-        
-        // ローカルストレージを更新
         localStorage.setItem('mock_staff', JSON.stringify(updatedStaff))
-        console.log('LocalStorage updated with:', JSON.stringify(updatedStaff))
-        
-        // 状態を更新
         setStaff(updatedStaff)
-        console.log('Staff state updated')
         
+        console.log('Deletion completed successfully')
         return { error: null }
       } else {
         console.log('SUPABASE MODE: Processing deletion')
