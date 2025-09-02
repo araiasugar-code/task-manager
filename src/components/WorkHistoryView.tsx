@@ -64,6 +64,14 @@ export default function WorkHistoryView() {
         const storedTasks = localStorage.getItem('mock_tasks')
         const allTasks: Task[] = storedTasks ? JSON.parse(storedTasks) : []
         
+        console.log('=== WorkHistory FULL DEBUG ===')
+        console.log('Total tasks in localStorage:', allTasks.length)
+        console.log('All tasks:', allTasks)
+        console.log('Current user:', user)
+        console.log('Selected month:', selectedMonth)
+        console.log('Dates to check:', dates)
+        console.log('================================')
+        
         dates.forEach(date => {
           const dayTasks = allTasks.filter(task => {
             if (task.date !== date) return false
@@ -164,6 +172,24 @@ export default function WorkHistoryView() {
             >
               🔄 更新
             </button>
+            {process.env.NODE_ENV === 'development' && (
+              <button
+                onClick={() => {
+                  const tasks = localStorage.getItem('mock_tasks')
+                  const parsed = tasks ? JSON.parse(tasks) : []
+                  console.log('=== localStorage DEBUG ===')
+                  console.log('Raw localStorage data:', tasks)
+                  console.log('Parsed tasks:', parsed)
+                  console.log('Total tasks:', parsed.length)
+                  console.log('========================')
+                  alert(`LocalStorage has ${parsed.length} tasks. Check console for details.`)
+                }}
+                className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded-lg transition-colors"
+                title="LocalStorageデバッグ"
+              >
+                🐛 Debug
+              </button>
+            )}
             <div>
               <label htmlFor="month-select" className="block text-sm font-medium text-slate-700 mb-2">
                 表示月

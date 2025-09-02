@@ -85,6 +85,11 @@ export function useUnifiedTasks(date: string) {
       const updatedAllTasks = [...allTasks, newTask]
       
       localStorage.setItem('mock_tasks', JSON.stringify(updatedAllTasks))
+      console.log('=== TASK ADDED DEBUG ===')
+      console.log('New task created:', newTask)
+      console.log('Total tasks after addition:', updatedAllTasks.length)
+      console.log('Saved to localStorage successfully')
+      console.log('========================')
       
       // 現在の日付のタスクのみ更新
       if (newTask.date === date) {
