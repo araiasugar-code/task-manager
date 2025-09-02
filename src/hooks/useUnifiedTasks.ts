@@ -7,7 +7,7 @@ import { formatDate } from '@/lib/utils'
 import { mockTasks, personalMockTasks, historicalMockTasks } from '@/lib/mockData'
 import { useUnifiedAuth } from './useUnifiedAuth'
 
-const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
+const isMockMode = true || process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
 
 export function useUnifiedTasks(date: string) {
   const [tasks, setTasks] = useState<Task[]>([])

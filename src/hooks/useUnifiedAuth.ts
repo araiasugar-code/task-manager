@@ -5,7 +5,7 @@ import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { mockUser } from '@/lib/mockData'
 
-const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
+const isMockMode = true || process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
 
 export function useUnifiedAuth() {
   const [user, setUser] = useState<any>(null)

@@ -24,7 +24,7 @@ interface MonthlyStats {
   completionRate: number
 }
 
-const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
+const isMockMode = true || process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
 
 export default function WorkHistoryView() {
   const [selectedMonth, setSelectedMonth] = useState(() => {

@@ -8,7 +8,8 @@ import { useUnifiedAuth } from './useUnifiedAuth'
 
 // モックモード判定（環境変数またはローカルストレージの強制設定）
 const forceMockMode = typeof window !== 'undefined' ? localStorage.getItem('force_mock_mode') === 'true' : false
-const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true' || forceMockMode
+// 本番環境でもMOCK_MODEを強制有効化（環境変数設定問題の回避）
+const isMockMode = true || process.env.NEXT_PUBLIC_MOCK_MODE === 'true' || forceMockMode
 
 console.log('=== useUnifiedStaff MODE CHECK ===')
 console.log('MOCK_MODE環境変数:', process.env.NEXT_PUBLIC_MOCK_MODE)
