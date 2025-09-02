@@ -31,15 +31,24 @@ export default function StaffSelector() {
   }
 
   const handleDeleteStaff = async (id: string, name: string) => {
-    if (confirm(`${name}さんを削除しますか？`)) {
+    console.log(`削除ボタンクリック: ${name} (ID: ${id})`)
+    
+    if (confirm(`${name}さんを削除しますか？\n\nID: ${id}`)) {
       try {
-        const { error } = await deleteStaff(id)
-        if (error) {
-          alert(`削除に失敗しました: ${error}`)
+        console.log('削除実行開始...')
+        const result = await deleteStaff(id)
+        console.log('削除結果:', result)
+        
+        if (result?.error) {
+          alert(`削除に失敗しました: ${result.error}`)
+          console.error('削除エラー:', result.error)
         } else {
           console.log(`スタッフ削除成功: ${name}`)
+          // 強制的にページリロード
+          setTimeout(() => window.location.reload(), 500)
         }
       } catch (err: any) {
+        console.error('削除例外:', err)
         alert(`削除エラー: ${err.message}`)
       }
     }
@@ -124,18 +133,37 @@ export default function StaffSelector() {
 
           {/* デバッグ用クリアボタン */}
           <div className="mt-4 pt-4 border-t border-gray-300">
-            <button
-              onClick={() => {
-                if (confirm('全てのスタッフデータとタスクデータをクリアしますか？')) {
-                  localStorage.removeItem('mock_staff')
-                  localStorage.removeItem('mock_tasks')
-                  window.location.reload()
-                }
-              }}
-              className="w-full py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded mb-2"
-            >
-              🗑️ デバッグ: 全データクリア
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  console.log('LocalStorage before clear:', {
+                    staff: localStorage.getItem('mock_staff'),
+                    tasks: localStorage.getItem('mock_tasks')
+                  })
+                  
+                  if (confirm('全てのスタッフデータとタスクデータをクリアしますか？')) {
+                    localStorage.clear() // 全てのlocalStorageをクリア
+                    console.log('LocalStorage cleared, reloading...')
+                    window.location.reload()
+                  }
+                }}
+                className="w-full py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded"
+              >
+                🗑️ 緊急: 全データクリア & リロード
+              </button>
+              
+              <button
+                onClick={() => {
+                  console.log('Current localStorage:', {
+                    staff: localStorage.getItem('mock_staff'),
+                    tasks: localStorage.getItem('mock_tasks')
+                  })
+                }}
+                className="w-full py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded"
+              >
+                🔍 デバッグ情報表示
+              </button>
+            </div>
           </div>
 
           {/* スタッフ追加フォーム */}

@@ -155,35 +155,60 @@ export function useUnifiedStaff() {
   }
 
   const deleteStaff = async (id: string) => {
-    console.log('deleteStaff called with id:', id, 'isMockMode:', isMockMode)
+    console.log('=== deleteStaff START ===')
+    console.log('ID to delete:', id)
+    console.log('isMockMode:', isMockMode)
+    console.log('Current staff state:', staff)
     
-    if (isMockMode) {
-      console.log('Current staff before deletion:', staff)
-      const staffToDelete = staff.find(s => s.id === id)
-      console.log('Staff to delete:', staffToDelete)
-      
-      const updatedStaff = staff.filter(s => s.id !== id)
-      console.log('Updated staff after deletion:', updatedStaff)
-      
-      setStaff(updatedStaff)
-      localStorage.setItem('mock_staff', JSON.stringify(updatedStaff))
-      
-      return { error: null }
-    } else {
-      try {
-        console.log('Deleting staff from Supabase with id:', id)
+    try {
+      if (isMockMode) {
+        console.log('MOCK MODE: Processing deletion')
+        
+        // 現在のLocalStorageの状態を確認
+        const currentLocalStorage = localStorage.getItem('mock_staff')
+        console.log('Current localStorage mock_staff:', currentLocalStorage)
+        
+        const staffToDelete = staff.find(s => s.id === id)
+        console.log('Staff to delete:', staffToDelete)
+        
+        if (!staffToDelete) {
+          console.error('Staff not found with id:', id)
+          return { error: 'スタッフが見つかりません' }
+        }
+        
+        const updatedStaff = staff.filter(s => s.id !== id)
+        console.log('Updated staff after filter:', updatedStaff)
+        
+        // ローカルストレージを更新
+        localStorage.setItem('mock_staff', JSON.stringify(updatedStaff))
+        console.log('LocalStorage updated with:', JSON.stringify(updatedStaff))
+        
+        // 状態を更新
+        setStaff(updatedStaff)
+        console.log('Staff state updated')
+        
+        return { error: null }
+      } else {
+        console.log('SUPABASE MODE: Processing deletion')
         const { error } = await supabase
           .from('staff_members')
           .update({ is_active: false })
           .eq('id', id)
 
-        if (error) throw error
+        if (error) {
+          console.error('Supabase error:', error)
+          throw error
+        }
+        
         setStaff(prev => prev.filter(s => s.id !== id))
+        console.log('Supabase deletion successful')
         return { error: null }
-      } catch (err: any) {
-        console.error('Supabase delete error:', err)
-        return { error: err.message }
       }
+    } catch (err: any) {
+      console.error('=== deleteStaff ERROR ===', err)
+      return { error: err.message || 'Unknown error' }
+    } finally {
+      console.log('=== deleteStaff END ===')
     }
   }
 
