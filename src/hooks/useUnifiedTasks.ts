@@ -43,15 +43,15 @@ export function useUnifiedTasks(date: string) {
       if (storedTasks) {
         const parsedTasks = JSON.parse(storedTasks)
         // デモユーザー、存在しないユーザーのタスクをフィルタリングして除去
-        const excludedNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo', 'aaaaaaa', 'test', 'sample', 'テスト']
+        const excludedNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', 'demo', 'aaaaaaa', 'test', 'sample', 'テスト']
         allTasks = parsedTasks.filter((task: Task) => 
           !excludedNames.includes(task.staff_name)
         )
         localStorage.setItem('mock_tasks', JSON.stringify(allTasks))
       } else {
-        // 初回時は空のタスクリストから開始
-        allTasks = [...mockTasks, ...personalMockTasks, ...historicalMockTasks]
-        localStorage.setItem('mock_tasks', JSON.stringify(allTasks))
+        // 初回時は空のタスクリストから開始（phantom staffを避けるため）
+        allTasks = []
+        localStorage.setItem('mock_tasks', JSON.stringify([]))
       }
 
       // 指定された日付のタスクのみフィルター

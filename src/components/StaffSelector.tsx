@@ -183,6 +183,11 @@ export default function StaffSelector() {
                     const cleanedStaff = currentStaff.filter((s: any) => !unwantedNames.includes(s.name))
                     localStorage.setItem('mock_staff', JSON.stringify(cleanedStaff))
                     
+                    // mock_tasksからも該当スタッフのタスクを除去
+                    const currentTasks = JSON.parse(localStorage.getItem('mock_tasks') || '[]')
+                    const cleanedTasks = currentTasks.filter((t: any) => !unwantedNames.includes(t.staff_name))
+                    localStorage.setItem('mock_tasks', JSON.stringify(cleanedTasks))
+                    
                     console.log('不要なスタッフを削除済みリストに追加:', unwantedNames)
                     window.location.reload()
                   }
