@@ -164,7 +164,7 @@ export default function StaffSelector() {
             <div className="mt-4 pt-4 border-t border-gray-300">
               <button
                 onClick={() => {
-                  const action = confirm('データクリア操作を選択してください:\n\nOK = 全データクリア\nキャンセル = 存在しないスタッフのみクリア')
+                  const action = confirm('データクリア操作を選択してください:\n\nOK = 全データクリア\nキャンセル = 不要なスタッフを削除済みに追加')
                   
                   if (action) {
                     // 全データクリア
@@ -172,17 +172,18 @@ export default function StaffSelector() {
                     console.log('All data cleared')
                     window.location.reload()
                   } else {
-                    // 存在しないスタッフのみクリア
+                    // 不要なスタッフを削除済みリストに追加
+                    const unwantedNames = ['demo', '山本', 'aaaaaaa']
+                    const deletedStaff = JSON.parse(localStorage.getItem('deleted_staff') || '[]')
+                    const updatedDeleted = [...new Set([...deletedStaff, ...unwantedNames])]
+                    localStorage.setItem('deleted_staff', JSON.stringify(updatedDeleted))
+                    
+                    // mock_staffからも除去
                     const currentStaff = JSON.parse(localStorage.getItem('mock_staff') || '[]')
-                    const excludedNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo', 'aaaaaaa', 'test', 'sample', 'テスト']
-                    const cleanedStaff = currentStaff.filter((s: any) => !excludedNames.includes(s.name))
+                    const cleanedStaff = currentStaff.filter((s: any) => !unwantedNames.includes(s.name))
                     localStorage.setItem('mock_staff', JSON.stringify(cleanedStaff))
                     
-                    const currentTasks = JSON.parse(localStorage.getItem('mock_tasks') || '[]')
-                    const cleanedTasks = currentTasks.filter((t: any) => !excludedNames.includes(t.staff_name))
-                    localStorage.setItem('mock_tasks', JSON.stringify(cleanedTasks))
-                    
-                    console.log(`クリーンアップ完了: ${currentStaff.length - cleanedStaff.length}名のスタッフを削除`)
+                    console.log('不要なスタッフを削除済みリストに追加:', unwantedNames)
                     window.location.reload()
                   }
                 }}
