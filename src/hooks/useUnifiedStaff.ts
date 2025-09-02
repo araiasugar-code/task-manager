@@ -14,68 +14,8 @@ export function useUnifiedStaff() {
   const [error, setError] = useState<string | null>(null)
   const { user } = useUnifiedAuth()
 
-  // ログインユーザーを自動的にスタッフとして追加
-  const ensureCurrentUserInStaff = async () => {
-    if (!user) return
-
-    const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || user?.email
-
-    if (isMockMode) {
-      const storedStaff = localStorage.getItem('mock_staff')
-      const currentStaff: StaffMember[] = storedStaff ? JSON.parse(storedStaff) : [...mockStaff]
-      
-      // 現在のユーザーがスタッフリストに存在するかチェック
-      const userExists = currentStaff.some(s => s.name === userName || s.email === user.email)
-      
-      if (!userExists) {
-        const newStaff: StaffMember = {
-          id: user.id || Date.now().toString(),
-          name: userName,
-          email: user.email,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-        
-        currentStaff.unshift(newStaff) // 先頭に追加
-        localStorage.setItem('mock_staff', JSON.stringify(currentStaff))
-        setStaff(currentStaff)
-      } else {
-        setStaff(currentStaff)
-      }
-    } else {
-      // 実際のSupabase
-      try {
-        // まず現在のユーザーがスタッフテーブルに存在するかチェック
-        const { data: existingStaff, error: checkError } = await supabase
-          .from('staff_members')
-          .select('*')
-          .or(`name.eq.${userName},email.eq.${user.email}`)
-          .eq('is_active', true)
-          .maybeSingle()
-
-        if (!existingStaff && !checkError) {
-          // 存在しない場合は自動追加
-          const { error: insertError } = await supabase
-            .from('staff_members')
-            .insert({
-              name: userName,
-              email: user.email,
-              user_id: user.id
-            })
-          
-          if (insertError) {
-            console.error('Error adding user to staff:', insertError)
-          }
-        }
-        
-        await fetchStaff()
-      } catch (error) {
-        console.error('Error ensuring user in staff:', error)
-        await fetchStaff()
-      }
-    }
-  }
+  // 管理者用：ログインユーザーの自動スタッフ追加は行わない
+  // スタッフは手動で管理する
 
   useEffect(() => {
     if (isMockMode) {
@@ -92,12 +32,7 @@ export function useUnifiedStaff() {
     }
   }, [])
 
-  // ユーザーがログインしたときに自動的にスタッフに追加
-  useEffect(() => {
-    if (user && !loading) {
-      ensureCurrentUserInStaff()
-    }
-  }, [user])
+  // 自動スタッフ追加は無効化（手動管理）
 
   const fetchStaff = async () => {
     if (isMockMode) return

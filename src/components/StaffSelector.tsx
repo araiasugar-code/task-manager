@@ -16,17 +16,8 @@ export default function StaffSelector() {
 
   const selectedCount = getSelectedStaffNames().length
 
-  // ログインユーザーを自動的に選択
-  useEffect(() => {
-    if (user && staff.length > 0) {
-      const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || user?.email
-      const currentUserStaff = staff.find(s => s.name === userName || s.email === user.email)
-      
-      if (currentUserStaff && !selectedStaff[currentUserStaff.name]) {
-        toggleStaffSelection(currentUserStaff.name)
-      }
-    }
-  }, [user, staff, selectedStaff, toggleStaffSelection])
+  // ログインユーザーの自動選択は無効化
+  // 管理者が手動で出勤者を選択する
 
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -8,6 +8,7 @@ import { useTaskStore } from '@/stores/taskStore'
 import { formatDisplayDate, calculateWorkingHours, calculateWorkingHoursByStaff, formatWorkingHours } from '@/lib/utils'
 import TaskTable from '@/components/TaskTable'
 import PersonalTaskView from '@/components/PersonalTaskView'
+import PersonalTaskMobileView from '@/components/PersonalTaskMobileView'
 import StaffSelector from '@/components/StaffSelector'
 import WorkHistoryView from '@/components/WorkHistoryView'
 
@@ -157,8 +158,8 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            {/* 個人タスクビュー */}
-            <PersonalTaskView />
+            {/* 個人タスクビュー（モバイル専用） */}
+            <PersonalTaskMobileView />
           </div>
         ) : (
           /* デスクトップレイアウト */
