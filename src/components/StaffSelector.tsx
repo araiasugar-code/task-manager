@@ -156,8 +156,11 @@ export default function StaffSelector() {
                 onClick={() => {
                   console.log('Current localStorage:', {
                     staff: localStorage.getItem('mock_staff'),
-                    tasks: localStorage.getItem('mock_tasks')
+                    tasks: localStorage.getItem('mock_tasks'),
+                    deleted_staff: localStorage.getItem('deleted_staff')
                   })
+                  console.log('Current staff state:', staff)
+                  alert(`LocalStorage確認:\n\nStaff: ${staff.length}名\nDeleted: ${JSON.parse(localStorage.getItem('deleted_staff') || '[]').length}名\n\nコンソールで詳細確認可能`)
                 }}
                 className="w-full py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded"
               >

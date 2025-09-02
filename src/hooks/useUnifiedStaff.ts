@@ -35,10 +35,20 @@ export function useUnifiedStaff() {
       const storedStaff = localStorage.getItem('mock_staff')
       if (storedStaff) {
         const parsedStaff = JSON.parse(storedStaff)
-        // デモユーザーをフィルタリングして除去
+        
+        // 削除済みリストを取得
+        const deletedStaffNames = JSON.parse(localStorage.getItem('deleted_staff') || '[]')
+        console.log('Deleted staff names:', deletedStaffNames)
+        
+        // デモユーザーと削除済みユーザーをフィルタリングして除去
+        const demoNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo']
+        const allExcludedNames = [...demoNames, ...deletedStaffNames]
+        
         const filteredStaff = parsedStaff.filter((s: StaffMember) => 
-          !['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo'].includes(s.name)
+          !allExcludedNames.includes(s.name)
         )
+        
+        console.log('Filtered staff after excluding demo and deleted:', filteredStaff)
         setStaff(filteredStaff)
         localStorage.setItem('mock_staff', JSON.stringify(filteredStaff))
       } else {
@@ -51,12 +61,16 @@ export function useUnifiedStaff() {
     }
   }, [])
 
-  // ログインユーザーをスタッフとして自動追加
+  // ログインユーザーをスタッフとして自動追加（初回のみ）
   useEffect(() => {
-    if (user && staff.length > 0) {
-      ensureUserAsStaff()
+    if (user && staff.length > 0 && !loading) {
+      const userName = user.user_metadata?.display_name || user.email?.split('@')[0] || user.email
+      if (userName && !staff.find(s => s.name === userName)) {
+        console.log('Auto-adding user as staff (first time only):', userName)
+        ensureUserAsStaff()
+      }
     }
-  }, [user, staff])
+  }, [user, staff, loading])
 
   // 自動スタッフ追加は無効化（手動管理）
 
@@ -175,6 +189,12 @@ export function useUnifiedStaff() {
           console.error('Staff not found with id:', id)
           return { error: 'スタッフが見つかりません' }
         }
+        
+        // 削除済みリストをLocalStorageに記録（再生成防止）
+        const deletedStaff = JSON.parse(localStorage.getItem('deleted_staff') || '[]')
+        deletedStaff.push(staffToDelete.name)
+        localStorage.setItem('deleted_staff', JSON.stringify(deletedStaff))
+        console.log('Added to deleted list:', staffToDelete.name)
         
         const updatedStaff = staff.filter(s => s.id !== id)
         console.log('Updated staff after filter:', updatedStaff)
