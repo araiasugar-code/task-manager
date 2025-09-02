@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Task, TaskFormData } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 import { mockTasks, personalMockTasks, historicalMockTasks } from '@/lib/mockData'
+import { useUnifiedAuth } from './useUnifiedAuth'
 
 const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
 
@@ -12,6 +13,7 @@ export function useUnifiedTasks(date: string) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { user } = useUnifiedAuth()
 
   const fetchTasks = async () => {
     if (isMockMode) return
@@ -72,7 +74,7 @@ export function useUnifiedTasks(date: string) {
         id: Date.now().toString(),
         date,
         ...taskData,
-        created_by: 'demo-user-id',
+        created_by: user?.id || 'anonymous-user',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
