@@ -46,8 +46,8 @@ export function useUnifiedStaff() {
         const deletedStaffNames = JSON.parse(localStorage.getItem('deleted_staff') || '[]')
         console.log('Deleted staff names:', deletedStaffNames)
         
-        // デモユーザーと削除済みユーザーをフィルタリングして除去
-        const demoNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo']
+        // デモユーザー、存在しないユーザー、削除済みユーザーをフィルタリングして除去
+        const demoNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo', 'aaaaaaa', 'test', 'sample', 'テスト']
         const allExcludedNames = [...demoNames, ...deletedStaffNames]
         
         const filteredStaff = parsedStaff.filter((s: StaffMember) => 

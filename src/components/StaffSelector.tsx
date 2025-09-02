@@ -170,7 +170,7 @@ export default function StaffSelector() {
                     tasks: localStorage.getItem('mock_tasks')
                   })
                   
-                  if (confirm('全てのスタッフデータとタスクデータをクリアしますか？')) {
+                  if (confirm('全てのスタッフデータとタスクデータをクリアしますか？\n\n「山本」「aaaaaaa」などの存在しないユーザーも完全に削除されます。')) {
                     localStorage.clear() // 全てのlocalStorageをクリア
                     console.log('LocalStorage cleared, reloading...')
                     window.location.reload()
@@ -179,6 +179,27 @@ export default function StaffSelector() {
                 className="w-full py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded"
               >
                 🗑️ 緊急: 全データクリア & リロード
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (confirm('存在しないスタッフ（山本、aaaaaaaなど）を削除しますか？')) {
+                    const currentStaff = JSON.parse(localStorage.getItem('mock_staff') || '[]')
+                    const excludedNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', '山本', 'demo', 'aaaaaaa', 'test', 'sample', 'テスト']
+                    const cleanedStaff = currentStaff.filter((s: any) => !excludedNames.includes(s.name))
+                    localStorage.setItem('mock_staff', JSON.stringify(cleanedStaff))
+                    
+                    const currentTasks = JSON.parse(localStorage.getItem('mock_tasks') || '[]')
+                    const cleanedTasks = currentTasks.filter((t: any) => !excludedNames.includes(t.staff_name))
+                    localStorage.setItem('mock_tasks', JSON.stringify(cleanedTasks))
+                    
+                    console.log(`クリーンアップ完了: ${currentStaff.length - cleanedStaff.length}名のスタッフと${currentTasks.length - cleanedTasks.length}件のタスクを削除`)
+                    window.location.reload()
+                  }
+                }}
+                className="w-full py-1 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded"
+              >
+                🧹 存在しないスタッフをクリーンアップ
               </button>
               
               <button
