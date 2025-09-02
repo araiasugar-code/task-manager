@@ -12,11 +12,30 @@ export default function TestConnectionPage() {
     const testResults: any = {}
 
     try {
-      // 1. Supabase接続テスト
+      // 1. 環境変数確認
       testResults.supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       testResults.mockMode = process.env.NEXT_PUBLIC_MOCK_MODE
+      testResults.urlLength = process.env.NEXT_PUBLIC_SUPABASE_URL?.length
+      testResults.keyLength = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length
       
-      // 2. 基本的な接続テスト
+      // 2. 直接fetch テスト
+      try {
+        const directFetch = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/`, {
+          headers: {
+            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+          }
+        })
+        testResults.directFetch = { 
+          status: directFetch.status, 
+          statusText: directFetch.statusText,
+          ok: directFetch.ok
+        }
+      } catch (directError: any) {
+        testResults.directFetch = { error: directError.message }
+      }
+      
+      // 3. 基本的なSupabaseクライアント接続テスト
       const { data: healthCheck, error: healthError } = await supabase
         .from('users')
         .select('count')
@@ -24,7 +43,7 @@ export default function TestConnectionPage() {
         .single()
 
       testResults.healthCheck = healthError ? 
-        { error: healthError.message } : 
+        { error: healthError.message, code: healthError.code } : 
         { success: true, data: healthCheck }
 
       // 3. RLSポリシーテスト
