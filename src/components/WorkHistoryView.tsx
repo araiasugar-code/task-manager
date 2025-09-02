@@ -5,6 +5,7 @@ import { useUnifiedTasks as useTasks } from '@/hooks/useUnifiedTasks'
 import { useUnifiedAuth } from '@/hooks/useUnifiedAuth'
 import { formatDisplayDate, calculateWorkingHours, formatWorkingHours, calculateWorkingHoursByStaff } from '@/lib/utils'
 import { Task } from '@/lib/types'
+import { supabase } from '@/lib/supabase'
 
 interface DayRecord {
   date: string
@@ -24,8 +25,7 @@ interface MonthlyStats {
   completionRate: number
 }
 
-const isVercelDeployment = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
-const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true' || isVercelDeployment
+const isMockMode = false
 
 export default function WorkHistoryView() {
   const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -109,8 +109,37 @@ export default function WorkHistoryView() {
           }
         })
       } else {
-        // 実際のSupabase実装は後で追加
-        // 現在はモックモードのみ対応
+        // 実際のSupabase実装
+        for (const date of dates) {
+          try {
+            const { data: dayTasks, error } = await supabase
+              .from('tasks')
+              .select('*')
+              .eq('date', date)
+              .or(`created_by.eq.${user?.id},staff_name.eq.${user?.user_metadata?.display_name || user?.email?.split('@')[0] || user?.email}`)
+            
+            if (error) {
+              console.error('Error fetching tasks for', date, ':', error)
+              continue
+            }
+            
+            if (dayTasks && dayTasks.length > 0) {
+              const totalHours = calculateWorkingHours(dayTasks)
+              const completedTasks = dayTasks.filter(t => t.status === 'completed').length
+              
+              records.push({
+                date,
+                totalHours,
+                totalTasks: dayTasks.length,
+                completedTasks,
+                completionRate: dayTasks.length > 0 ? Math.round((completedTasks / dayTasks.length) * 100) : 0,
+                tasks: dayTasks
+              })
+            }
+          } catch (err) {
+            console.error('Error processing date', date, ':', err)
+          }
+        }
       }
       
       setMonthlyRecords(records.sort((a, b) => b.date.localeCompare(a.date)))

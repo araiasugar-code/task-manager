@@ -7,8 +7,7 @@ import { formatDate } from '@/lib/utils'
 import { mockTasks, personalMockTasks, historicalMockTasks } from '@/lib/mockData'
 import { useUnifiedAuth } from './useUnifiedAuth'
 
-const isVercelDeployment = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
-const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true' || isVercelDeployment
+const isMockMode = false
 
 export function useUnifiedTasks(date: string) {
   const [tasks, setTasks] = useState<Task[]>([])
