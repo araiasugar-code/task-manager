@@ -32,15 +32,17 @@ export default function StaffSelector() {
 
   const handleDeleteStaff = async (id: string, name: string) => {
     console.log(`削除ボタンクリック: ${name} (ID: ${id})`)
+    console.log('MOCK_MODE環境変数:', process.env.NEXT_PUBLIC_MOCK_MODE)
+    console.log('isMockMode判定:', process.env.NEXT_PUBLIC_MOCK_MODE === 'true')
     
-    if (confirm(`${name}さんを削除しますか？\n\nID: ${id}`)) {
+    if (confirm(`${name}さんを削除しますか？\n\nID: ${id}\nMOCK_MODE: ${process.env.NEXT_PUBLIC_MOCK_MODE}`)) {
       try {
         console.log('削除実行開始...')
         const result = await deleteStaff(id)
         console.log('削除結果:', result)
         
         if (result?.error) {
-          alert(`削除に失敗しました: ${result.error}`)
+          alert(`削除に失敗しました: ${result.error}\n\nMOCK_MODE: ${process.env.NEXT_PUBLIC_MOCK_MODE}`)
           console.error('削除エラー:', result.error)
         } else {
           console.log(`スタッフ削除成功: ${name}`)
@@ -160,11 +162,27 @@ export default function StaffSelector() {
                     deleted_staff: localStorage.getItem('deleted_staff')
                   })
                   console.log('Current staff state:', staff)
-                  alert(`LocalStorage確認:\n\nStaff: ${staff.length}名\nDeleted: ${JSON.parse(localStorage.getItem('deleted_staff') || '[]').length}名\n\nコンソールで詳細確認可能`)
+                  console.log('Environment variables:', {
+                    MOCK_MODE: process.env.NEXT_PUBLIC_MOCK_MODE,
+                    SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL
+                  })
+                  alert(`LocalStorage確認:\n\nStaff: ${staff.length}名\nDeleted: ${JSON.parse(localStorage.getItem('deleted_staff') || '[]').length}名\nMOCK_MODE: ${process.env.NEXT_PUBLIC_MOCK_MODE}\n\nコンソールで詳細確認可能`)
                 }}
                 className="w-full py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded"
               >
                 🔍 デバッグ情報表示
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (confirm('モックモードに強制切り替えしますか？')) {
+                    localStorage.setItem('force_mock_mode', 'true')
+                    window.location.reload()
+                  }
+                }}
+                className="w-full py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-xs rounded"
+              >
+                ⚡ 強制モックモード
               </button>
             </div>
           </div>

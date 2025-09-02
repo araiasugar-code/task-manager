@@ -6,7 +6,13 @@ import { StaffMember } from '@/lib/types'
 import { mockStaff } from '@/lib/mockData'
 import { useUnifiedAuth } from './useUnifiedAuth'
 
-const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
+// モックモード判定（環境変数またはローカルストレージの強制設定）
+const forceMockMode = typeof window !== 'undefined' ? localStorage.getItem('force_mock_mode') === 'true' : false
+const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true' || forceMockMode
+
+console.log('useUnifiedStaff - MOCK_MODE環境変数:', process.env.NEXT_PUBLIC_MOCK_MODE)
+console.log('useUnifiedStaff - forceMockMode:', forceMockMode)
+console.log('useUnifiedStaff - 最終isMockMode:', isMockMode)
 
 export function useUnifiedStaff() {
   const [staff, setStaff] = useState<StaffMember[]>([])
