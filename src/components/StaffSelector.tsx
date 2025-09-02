@@ -32,7 +32,16 @@ export default function StaffSelector() {
 
   const handleDeleteStaff = async (id: string, name: string) => {
     if (confirm(`${name}さんを削除しますか？`)) {
-      await deleteStaff(id)
+      try {
+        const { error } = await deleteStaff(id)
+        if (error) {
+          alert(`削除に失敗しました: ${error}`)
+        } else {
+          console.log(`スタッフ削除成功: ${name}`)
+        }
+      } catch (err: any) {
+        alert(`削除エラー: ${err.message}`)
+      }
     }
   }
 
@@ -97,8 +106,12 @@ export default function StaffSelector() {
                     </span>
                   </label>
                   <button
-                    onClick={() => handleDeleteStaff(member.id, member.name)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-600 transition-all"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteStaff(member.id, member.name)
+                    }}
+                    className="opacity-60 group-hover:opacity-100 p-1 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                    title={`${member.name}を削除`}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

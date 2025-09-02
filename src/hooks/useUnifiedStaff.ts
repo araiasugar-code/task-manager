@@ -34,7 +34,13 @@ export function useUnifiedStaff() {
     if (isMockMode) {
       const storedStaff = localStorage.getItem('mock_staff')
       if (storedStaff) {
-        setStaff(JSON.parse(storedStaff))
+        const parsedStaff = JSON.parse(storedStaff)
+        // 日本語名のデモユーザーをフィルタリングして除去
+        const filteredStaff = parsedStaff.filter((s: StaffMember) => 
+          !['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー'].includes(s.name)
+        )
+        setStaff(filteredStaff)
+        localStorage.setItem('mock_staff', JSON.stringify(filteredStaff))
       } else {
         setStaff(mockStaff)
         localStorage.setItem('mock_staff', JSON.stringify(mockStaff))
