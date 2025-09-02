@@ -197,26 +197,17 @@ export default function LoginPage() {
               </div>
             )}
 
-            <div className="text-center space-y-2">
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
-                >
-                  {isSignUp
-                    ? 'すでにアカウントをお持ちですか？ログイン'
-                    : 'アカウントをお持ちでない方はこちら'
-                  }
-                </button>
-              </div>
-              {!isSignUp && (
-                <div>
-                  <Link href="/register" className="text-blue-600 hover:text-blue-700 text-sm transition-colors">
-                    新規アカウント登録
-                  </Link>
-                </div>
-              )}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+              >
+                {isSignUp
+                  ? 'すでにアカウントをお持ちですか？ログインに戻る'
+                  : 'アカウントをお持ちでない方はこちら - 新規登録'
+                }
+              </button>
             </div>
           </form>
         </div>
