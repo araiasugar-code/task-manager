@@ -44,20 +44,26 @@ export function useUnifiedStaff() {
         
         // 削除済みリストを取得
         const deletedStaffNames = JSON.parse(localStorage.getItem('deleted_staff') || '[]')
+        console.log('=== useUnifiedStaff Debug ===')
+        console.log('Stored staff:', parsedStaff)
         console.log('Deleted staff names:', deletedStaffNames)
         
         // デモユーザー、存在しないユーザー、削除済みユーザーをフィルタリングして除去
-        const demoNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', 'demo', 'aaaaaaa', 'test', 'sample', 'テスト']
-        const allExcludedNames = [...demoNames, ...deletedStaffNames]
+        const phantomNames = ['田中太郎', '佐藤花子', '山田次郎', '鈴木美香', '高橋健太', 'デモユーザー', 'demo', 'aaaaaaa', 'test', 'sample', 'テスト', '山本']
+        const allExcludedNames = [...phantomNames, ...deletedStaffNames]
+        console.log('All excluded names:', allExcludedNames)
         
-        const filteredStaff = parsedStaff.filter((s: StaffMember) => 
-          !allExcludedNames.includes(s.name)
-        )
+        const filteredStaff = parsedStaff.filter((s: StaffMember) => {
+          const shouldExclude = allExcludedNames.includes(s.name)
+          console.log(`Staff ${s.name}: shouldExclude=${shouldExclude}`)
+          return !shouldExclude
+        })
         
-        console.log('Filtered staff after excluding demo and deleted:', filteredStaff)
+        console.log('Final filtered staff:', filteredStaff)
         setStaff(filteredStaff)
         localStorage.setItem('mock_staff', JSON.stringify(filteredStaff))
       } else {
+        console.log('No stored staff, starting with empty array')
         // 初期状態では空のスタッフリストから開始
         setStaff([])
         localStorage.setItem('mock_staff', JSON.stringify([]))
@@ -68,16 +74,16 @@ export function useUnifiedStaff() {
     }
   }, [])
 
-  // ログインユーザーをスタッフとして自動追加（初回のみ）
-  useEffect(() => {
-    if (user && staff.length > 0 && !loading) {
-      const userName = user.user_metadata?.display_name || user.email?.split('@')[0] || user.email
-      if (userName && !staff.find(s => s.name === userName)) {
-        console.log('Auto-adding user as staff (first time only):', userName)
-        ensureUserAsStaff()
-      }
-    }
-  }, [user, staff, loading])
+  // ログインユーザーの自動追加を無効化（手動管理に変更）
+  // useEffect(() => {
+  //   if (user && staff.length > 0 && !loading) {
+  //     const userName = user.user_metadata?.display_name || user.email?.split('@')[0] || user.email
+  //     if (userName && !staff.find(s => s.name === userName)) {
+  //       console.log('Auto-adding user as staff (first time only):', userName)
+  //       ensureUserAsStaff()
+  //     }
+  //   }
+  // }, [user, staff, loading])
 
   // 自動スタッフ追加は無効化（手動管理）
 
