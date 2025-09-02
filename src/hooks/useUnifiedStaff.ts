@@ -14,8 +14,21 @@ export function useUnifiedStaff() {
   const [error, setError] = useState<string | null>(null)
   const { user } = useUnifiedAuth()
 
-  // 管理者用：ログインユーザーの自動スタッフ追加は行わない
-  // スタッフは手動で管理する
+  // ログインユーザーを自動的にスタッフとして追加
+  const ensureUserAsStaff = async () => {
+    if (!user) return
+    
+    const userName = user.user_metadata?.display_name || user.email?.split('@')[0] || user.email
+    if (!userName) return
+    
+    // 既にスタッフリストにいるかチェック
+    const existingStaff = staff.find(s => s.name === userName)
+    if (existingStaff) return
+    
+    // スタッフとして追加
+    console.log('Adding logged-in user as staff:', userName)
+    await addStaff(userName)
+  }
 
   useEffect(() => {
     if (isMockMode) {
@@ -31,6 +44,13 @@ export function useUnifiedStaff() {
       fetchStaff()
     }
   }, [])
+
+  // ログインユーザーをスタッフとして自動追加
+  useEffect(() => {
+    if (user && staff.length > 0) {
+      ensureUserAsStaff()
+    }
+  }, [user, staff])
 
   // 自動スタッフ追加は無効化（手動管理）
 

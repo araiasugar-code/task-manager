@@ -29,7 +29,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 769)
+      const width = window.innerWidth
+      console.log('Window width:', width, 'isMobile will be:', width < 769)
+      setIsMobile(width < 769)
     }
     
     checkIsMobile()

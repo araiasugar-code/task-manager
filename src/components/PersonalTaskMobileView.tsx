@@ -3,20 +3,24 @@
 import { useState } from 'react'
 import { useUnifiedTasks } from '@/hooks/useUnifiedTasks'
 import { useUnifiedAuth } from '@/hooks/useUnifiedAuth'
-import { Task } from '@/lib/types'
+import { useTaskStore } from '@/stores/taskStore'
+import { Task, TaskFormData } from '@/lib/types'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
+import TaskModal from './TaskModal'
 
 export default function PersonalTaskMobileView() {
   const { user } = useUnifiedAuth()
-  const { tasks } = useUnifiedTasks()
-  const [selectedDate] = useState(new Date())
+  const { selectedDate } = useTaskStore()
+  const { tasks, addTask, updateTask, deleteTask } = useUnifiedTasks(selectedDate)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   
   // ログインユーザーの名前を取得
   const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || user?.email
   
   // 本日のログインユーザーのタスクをフィルタリング
-  const todayString = format(selectedDate, 'yyyy-MM-dd')
+  const todayString = selectedDate
   const myTasks = tasks.filter(task => 
     task.date === todayString && 
     (task.staff_name === userName || task.created_by === user?.id)
@@ -24,6 +28,37 @@ export default function PersonalTaskMobileView() {
 
   // 時間別にソート
   const sortedTasks = myTasks.sort((a, b) => a.start_hour - b.start_hour)
+
+  const openTaskModal = (task?: Task) => {
+    setSelectedTask(task || null)
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setSelectedTask(null)
+  }
+
+  const handleSaveTask = async (taskData: TaskFormData) => {
+    const { error } = await addTask(taskData)
+    if (error) {
+      throw new Error(error)
+    }
+  }
+
+  const handleUpdateTask = async (id: string, taskData: Partial<TaskFormData>) => {
+    const { error } = await updateTask(id, taskData)
+    if (error) {
+      throw new Error(error)
+    }
+  }
+
+  const handleDeleteTask = async (id: string) => {
+    const { error } = await deleteTask(id)
+    if (error) {
+      throw new Error(error)
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -59,7 +94,7 @@ export default function PersonalTaskMobileView() {
           {userName}さんのタスク
         </h2>
         <p className="text-sm opacity-90">
-          {format(selectedDate, 'M月d日（E）', { locale: ja })}
+          {format(new Date(selectedDate), 'M月d日（E）', { locale: ja })}
         </p>
       </div>
 
@@ -70,11 +105,27 @@ export default function PersonalTaskMobileView() {
             <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <p>本日のタスクはありません</p>
+            <p className="mb-4">本日のタスクはありません</p>
+            <p className="text-red-500 font-bold">DEBUG: ボタンが表示されるはずです</p>
+            
+            {/* タスク追加ボタン（空の状態時） */}
+            <button
+              onClick={() => openTaskModal()}
+              className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors inline-flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              新しいタスクを追加
+            </button>
           </div>
         ) : (
           sortedTasks.map((task, index) => (
-            <div key={task.id || index} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div 
+              key={task.id || index} 
+              className="bg-white rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => openTaskModal(task)}
+            >
               <div className="p-4">
                 {/* 時間 */}
                 <div className="flex items-center justify-between mb-2">
@@ -101,14 +152,40 @@ export default function PersonalTaskMobileView() {
             </div>
           ))
         )}
+        
+        {/* タスクがある場合の追加ボタン */}
+        {sortedTasks.length > 0 && (
+          <div className="pt-4">
+            <button
+              onClick={() => openTaskModal()}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              新しいタスクを追加
+            </button>
+          </div>
+        )}
       </div>
 
       {/* フッター */}
-      <div className="p-4 border-t border-gray-200 mt-8">
+      <div className="p-4 border-t border-gray-200">
         <div className="text-center text-sm text-gray-500">
-          <p>PC版で詳細な管理が可能です</p>
+          <p>タスクをタップして編集できます</p>
         </div>
       </div>
+
+      {/* タスクモーダル */}
+      <TaskModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSave={handleSaveTask}
+        onUpdate={handleUpdateTask}
+        onDelete={handleDeleteTask}
+        task={selectedTask}
+        staffName={userName}
+      />
     </div>
   )
 }
