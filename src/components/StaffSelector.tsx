@@ -6,7 +6,7 @@ import { useTaskStore } from '@/stores/taskStore'
 import { useUnifiedAuth } from '@/hooks/useUnifiedAuth'
 
 export default function StaffSelector() {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [newStaffName, setNewStaffName] = useState('')
   const [isAddingStaff, setIsAddingStaff] = useState(false)
 
@@ -77,6 +77,11 @@ export default function StaffSelector() {
           <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
             {loading ? (
               <div className="text-center text-gray-600 py-4">読み込み中...</div>
+            ) : staff.length === 0 ? (
+              <div className="text-center text-gray-500 py-4">
+                <p className="mb-2">スタッフが登録されていません</p>
+                <p className="text-sm">下の「+ スタッフを追加」ボタンから登録してください</p>
+              </div>
             ) : (
               staff.map((member) => (
                 <div key={member.id} className="flex items-center justify-between group">
