@@ -8,12 +8,15 @@ import { useUnifiedAuth } from './useUnifiedAuth'
 
 // モックモード判定（環境変数またはローカルストレージの強制設定）
 const forceMockMode = typeof window !== 'undefined' ? localStorage.getItem('force_mock_mode') === 'true' : false
-// 本番環境でもMOCK_MODEを強制有効化（環境変数設定問題の回避）
-const isMockMode = true || process.env.NEXT_PUBLIC_MOCK_MODE === 'true' || forceMockMode
+// Vercelデプロイ時はMOCK_MODEを有効化（環境変数設定問題の回避）
+const isVercelDeployment = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true' || isVercelDeployment || forceMockMode
 
 console.log('=== useUnifiedStaff MODE CHECK ===')
 console.log('MOCK_MODE環境変数:', process.env.NEXT_PUBLIC_MOCK_MODE)
 console.log('forceMockMode:', forceMockMode)
+console.log('isVercelDeployment:', isVercelDeployment)
+console.log('hostname:', typeof window !== 'undefined' ? window.location.hostname : 'server-side')
 console.log('最終isMockMode:', isMockMode)
 console.log('========================')
 

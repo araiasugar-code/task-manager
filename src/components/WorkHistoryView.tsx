@@ -24,7 +24,8 @@ interface MonthlyStats {
   completionRate: number
 }
 
-const isMockMode = true || process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
+const isVercelDeployment = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true' || isVercelDeployment
 
 export default function WorkHistoryView() {
   const [selectedMonth, setSelectedMonth] = useState(() => {
