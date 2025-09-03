@@ -6,8 +6,8 @@ import { StaffMember } from '@/lib/types'
 import { mockStaff } from '@/lib/mockData'
 import { useUnifiedAuth } from './useUnifiedAuth'
 
-// モックモードを完全に無効化 - 全てSupabaseを使用
-const isMockMode = false
+// モックモードは環境変数に従う
+const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
 
 export function useUnifiedStaff() {
   const [staff, setStaff] = useState<StaffMember[]>([])

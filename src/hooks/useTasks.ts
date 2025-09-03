@@ -134,6 +134,8 @@ export function useTasks(date: string) {
   useEffect(() => {
     fetchTasks()
 
+    // リアルタイム機能を一時的に無効化（WebSocketエラー対応）
+    /*
     const channel = supabase
       .channel('tasks_changes')
       .on('postgres_changes',
@@ -156,9 +158,10 @@ export function useTasks(date: string) {
         }
       )
       .subscribe()
+    */
 
     return () => {
-      supabase.removeChannel(channel)
+      // supabase.removeChannel(channel)
     }
   }, [date])
 

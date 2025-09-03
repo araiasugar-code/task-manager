@@ -5,8 +5,8 @@ import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { mockUser } from '@/lib/mockData'
 
-// 認証は常にSupabaseを使用（実際のユーザーログインのため）
-const isMockMode = false
+// 認証は環境変数に従う
+const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
 
 export function useUnifiedAuth() {
   const [user, setUser] = useState<any>(null)
