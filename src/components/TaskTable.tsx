@@ -28,6 +28,20 @@ export default function TaskTable() {
   const { tasks, addTask, updateTask, updateTaskStatus, deleteTask, loading } = useTasks(selectedDate)
 
   const selectedStaffNames = getSelectedStaffNames()
+  
+  // 削除されたスタッフのタスクを除外
+  const filteredTasks = tasks.filter(task => {
+    // 削除されたスタッフのタスクを除外（モック・本番問わず）
+    try {
+      const deletedStaff = JSON.parse(localStorage.getItem('deleted_staff') || '[]')
+      if (deletedStaff.includes(task.staff_name)) {
+        return false
+      }
+    } catch (error) {
+      console.error('Error reading deleted_staff from localStorage:', error)
+    }
+    return true
+  })
 
   // ドラッグイベントの管理
   useEffect(() => {
@@ -62,7 +76,7 @@ export default function TaskTable() {
   }
 
   const checkTimeOverlap = (taskData: TaskFormData, excludeTaskId?: string) => {
-    return tasks.some(task => {
+    return filteredTasks.some(task => {
       if (excludeTaskId && task.id === excludeTaskId) return false
       if (task.staff_name !== taskData.staff_name) return false
       
@@ -116,7 +130,7 @@ export default function TaskTable() {
   }
 
   const getTaskForTimeSlot = (staffName: string, hour: number): Task | undefined => {
-    return tasks.find(task => 
+    return filteredTasks.find(task => 
       task.staff_name === staffName && 
       task.start_hour <= hour && 
       task.end_hour > hour
@@ -154,7 +168,7 @@ export default function TaskTable() {
     if (!dragState) return
     
     const newHour = getHourFromMousePosition(e.clientX)
-    const task = tasks.find(t => t.id === dragState.taskId)
+    const task = filteredTasks.find(t => t.id === dragState.taskId)
     if (!task) return
 
     let newStartHour = task.start_hour
@@ -175,7 +189,7 @@ export default function TaskTable() {
     if (!dragState) return
     
     const newHour = getHourFromMousePosition(e.clientX)
-    const task = tasks.find(t => t.id === dragState.taskId)
+    const task = filteredTasks.find(t => t.id === dragState.taskId)
     if (!task) {
       setDragState(null)
       return
@@ -278,7 +292,7 @@ export default function TaskTable() {
               </div>
             ) : (
               selectedStaffNames.map(staffName => {
-                const staffTasks = tasks.filter(task => task.staff_name === staffName)
+                const staffTasks = filteredTasks.filter(task => task.staff_name === staffName)
                 const staffWorkingHours = calculateWorkingHours(staffTasks)
                 
                 return (

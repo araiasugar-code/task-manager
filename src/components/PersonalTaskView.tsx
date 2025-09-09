@@ -24,8 +24,18 @@ export default function PersonalTaskView() {
   // ユーザーの表示名を取得（スタッフ名と一致するように統一）
   const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || user?.email || 'あなた'
   
-  // 現在のユーザーのタスクのみフィルタリング
+  // 現在のユーザーのタスクのみフィルタリング（重複除去付き）
   const userTasks = tasks.filter(task => {
+    // 削除されたスタッフのタスクを除外
+    try {
+      const deletedStaff = JSON.parse(localStorage.getItem('deleted_staff') || '[]')
+      if (deletedStaff.includes(task.staff_name)) {
+        return false
+      }
+    } catch (error) {
+      console.error('Error reading deleted_staff from localStorage:', error)
+    }
+    
     // スタッフ名でマッチング（優先）
     if (task.staff_name === userName) return true
     
@@ -40,6 +50,9 @@ export default function PersonalTaskView() {
     }
     
     return false
+  }).filter((task, index, array) => {
+    // IDによる重複除去
+    return array.findIndex(t => t.id === task.id) === index
   })
 
   const openTaskModal = (staffName?: string, startHour?: number, task?: Task) => {
@@ -255,6 +268,19 @@ export default function PersonalTaskView() {
                 {formatWorkingHours(calculateWorkingHours(userTasks))}
               </span>
             </div>
+            
+            {/* デバッグ情報 */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-2 text-xs text-gray-500">
+                <div>表示タスク数: {userTasks.length}</div>
+                <div>計算時間: {calculateWorkingHours(userTasks)}h</div>
+                {userTasks.map(task => (
+                  <div key={task.id}>
+                    {task.task_name}: {task.start_hour}:00-{task.end_hour}:00 ({task.end_hour - task.start_hour}h)
+                  </div>
+                ))}
+              </div>
+            )}
             
             {/* 稼働時間の内訳 */}
             {userTasks.length > 0 && (

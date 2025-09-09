@@ -15,6 +15,7 @@ export function useUnifiedTasks(date: string) {
   const [error, setError] = useState<string | null>(null)
   const { user } = useUnifiedAuth()
   const skipNextFetch = useRef(false)
+  const fixedTaskIds = useRef<Set<string>>(new Set())
 
   const fetchTasks = async () => {
     if (isMockMode) {
@@ -55,11 +56,13 @@ export function useUnifiedTasks(date: string) {
       setTasks(data || [])
       
       // 所有権が設定されていないタスクがあれば自動修正（認証状態を直接取得したユーザーIDを使用）
-      const orphanTasks = data?.filter(t => !t.created_by) || []
+      const orphanTasks = data?.filter(t => !t.created_by && !fixedTaskIds.current.has(t.id)) || []
       const userIdToUse = currentUser?.id || user?.id
       if (orphanTasks.length > 0 && userIdToUse) {
         console.log(`🔧 [FETCH] 所有権未設定タスク${orphanTasks.length}件を修正中... (ユーザーID: ${userIdToUse})`)
         await fixOrphanTasks(orphanTasks.map(t => t.id), userIdToUse)
+        // 修正したタスクIDを記録（無限ループ防止）
+        orphanTasks.forEach(t => fixedTaskIds.current.add(t.id))
       }
     } catch (err: any) {
       console.error('❌ [FETCH] データ取得エラー:', err)
@@ -84,10 +87,6 @@ export function useUnifiedTasks(date: string) {
         console.error('❌ [FIX] 所有権修正エラー:', error)
       } else {
         console.log(`✅ [FIX] 所有権修正完了: ${taskIds.length}件`)
-        // 修正後に再取得して状態を更新
-        setTimeout(() => {
-          fetchTasks()
-        }, 500)
       }
     } catch (err) {
       console.error('❌ [FIX] 所有権修正例外:', err)
@@ -268,16 +267,21 @@ export function useUnifiedTasks(date: string) {
             
             if (updateError) {
               console.error(`❌ [DELETE] 所有権修正エラー:`, updateError)
+              throw updateError
             } else {
               console.log(`✅ [DELETE] 所有権修正完了`)
+              // 所有権修正後、少し待ってから削除処理を実行
+              await new Promise(resolve => setTimeout(resolve, 100))
             }
           }
         }
         
+        console.log(`🗑️ [DELETE] 削除処理実行中: ID=${id}`)
         const { error, count } = await supabase
           .from('tasks')
           .delete({ count: 'exact' })
           .eq('id', id)
+          .eq('created_by', userIdToUse)
 
         if (error) {
           console.error(`❌ [DELETE] Supabase削除エラー:`, error)

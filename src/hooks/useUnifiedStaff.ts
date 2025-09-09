@@ -69,18 +69,16 @@ export function useUnifiedStaff() {
     }
   }, [])
 
-  // ログインユーザーの自動追加を無効化（手動管理に変更）
-  // useEffect(() => {
-  //   if (user && staff.length > 0 && !loading) {
-  //     const userName = user.user_metadata?.display_name || user.email?.split('@')[0] || user.email
-  //     if (userName && !staff.find(s => s.name === userName)) {
-  //       console.log('Auto-adding user as staff (first time only):', userName)
-  //       ensureUserAsStaff()
-  //     }
-  //   }
-  // }, [user, staff, loading])
-
-  // 自動スタッフ追加は無効化（手動管理）
+  // ログインユーザーの自動追加（問題修正版）
+  useEffect(() => {
+    if (user && !loading) {
+      const userName = user.user_metadata?.display_name || user.email?.split('@')[0] || user.email
+      if (userName && !staff.find(s => s.name === userName)) {
+        console.log('Auto-adding user as staff (first time only):', userName)
+        ensureUserAsStaff()
+      }
+    }
+  }, [user, staff.length, loading]) // staff.lengthを監視して無限ループを防ぐ
 
   const fetchStaff = async () => {
     if (isMockMode) return
@@ -204,6 +202,12 @@ export function useUnifiedStaff() {
           console.log('Added to deleted list:', staffToDelete.name)
         }
         
+        // 削除されたスタッフのタスクも削除
+        const currentTasks = JSON.parse(localStorage.getItem('mock_tasks') || '[]')
+        const cleanedTasks = currentTasks.filter((task: any) => task.staff_name !== staffToDelete.name)
+        localStorage.setItem('mock_tasks', JSON.stringify(cleanedTasks))
+        console.log(`Removed tasks for staff: ${staffToDelete.name}`)
+        
         // LocalStorageとstateの両方を即座に更新
         const updatedStaff = staff.filter(s => s.id !== id)
         localStorage.setItem('mock_staff', JSON.stringify(updatedStaff))
@@ -213,14 +217,35 @@ export function useUnifiedStaff() {
         return { error: null }
       } else {
         console.log('SUPABASE MODE: Processing deletion')
-        const { error } = await supabase
+        const staffToDelete = staff.find(s => s.id === id)
+        
+        if (!staffToDelete) {
+          console.error('Staff not found with id:', id)
+          return { error: 'スタッフが見つかりません' }
+        }
+        
+        // スタッフを非アクティブに設定
+        const { error: staffError } = await supabase
           .from('staff_members')
           .update({ is_active: false })
           .eq('id', id)
 
-        if (error) {
-          console.error('Supabase error:', error)
-          throw error
+        if (staffError) {
+          console.error('Supabase staff error:', staffError)
+          throw staffError
+        }
+        
+        // 削除されたスタッフのタスクも削除
+        const { error: taskError } = await supabase
+          .from('tasks')
+          .delete()
+          .eq('staff_name', staffToDelete.name)
+          
+        if (taskError) {
+          console.warn('Failed to delete tasks for staff:', taskError)
+          // タスク削除の失敗は警告に留める（スタッフ削除は続行）
+        } else {
+          console.log(`Removed tasks for staff: ${staffToDelete.name}`)
         }
         
         setStaff(prev => prev.filter(s => s.id !== id))

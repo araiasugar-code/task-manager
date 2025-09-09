@@ -12,7 +12,7 @@ export default function StaffSelector() {
 
   const { user } = useUnifiedAuth()
   const { staff, addStaff, deleteStaff, loading } = useStaff()
-  const { selectedStaff, toggleStaffSelection, getSelectedStaffNames } = useTaskStore()
+  const { selectedStaff, toggleStaffSelection, getSelectedStaffNames, removeStaffFromSelection } = useTaskStore()
 
   const selectedCount = getSelectedStaffNames().length
 
@@ -55,7 +55,8 @@ export default function StaffSelector() {
           console.error('削除エラー:', result.error)
         } else {
           console.log(`スタッフ削除成功: ${name}`)
-          // ページリロードなしで即座に反映されるはず
+          // 削除されたスタッフの選択状態も解除
+          removeStaffFromSelection(name)
         }
       } catch (err: any) {
         console.error('削除例外:', err)

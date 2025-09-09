@@ -10,6 +10,7 @@ interface TaskStore {
   toggleStaffSelection: (staffName: string) => void
   getSelectedStaffNames: () => string[]
   clearSelections: () => void
+  removeStaffFromSelection: (staffName: string) => void
 }
 
 export const useTaskStore = create<TaskStore>()(
@@ -39,7 +40,14 @@ export const useTaskStore = create<TaskStore>()(
 
       clearSelections: () => set({
         selectedStaff: {}
-      })
+      }),
+
+      removeStaffFromSelection: (staffName: string) => {
+        const { selectedStaff } = get()
+        const updatedStaff = { ...selectedStaff }
+        delete updatedStaff[staffName]
+        set({ selectedStaff: updatedStaff })
+      }
     }),
     {
       name: 'task-store',
