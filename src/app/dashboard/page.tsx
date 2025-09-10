@@ -17,17 +17,21 @@ export default function DashboardPage() {
   const router = useRouter()
   const [isMobile, setIsMobile] = useState(false)
   const [activeTab, setActiveTab] = useState<'tasks' | 'history'>('tasks')
+  const [isClient, setIsClient] = useState(false)
 
   const { selectedDate, setSelectedDate, getSelectedStaffNames } = useTaskStore()
   const { tasks, getTaskStats } = useTasks(selectedDate)
 
   useEffect(() => {
+    setIsClient(true)
     if (!loading && !user) {
       router.push('/login')
     }
   }, [user, loading, router])
 
   useEffect(() => {
+    if (!isClient) return
+    
     const checkIsMobile = () => {
       const width = window.innerWidth
       console.log('Window width:', width, 'isMobile will be:', width < 769)
@@ -37,9 +41,9 @@ export default function DashboardPage() {
     checkIsMobile()
     window.addEventListener('resize', checkIsMobile)
     return () => window.removeEventListener('resize', checkIsMobile)
-  }, [])
+  }, [isClient])
 
-  if (loading) {
+  if (loading || !isClient) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
         <div className="text-center">
